@@ -1,4 +1,11 @@
 require 'rspec/expectations'
+$LOAD_PATH << "lib"
+$LOAD_PATH << "models"
+
+require 'environment'
+require 'injury'
+
+Environment.environment = "test"
 
 def run_ltk_with_input(*inputs)
   shell_output = ""
@@ -12,10 +19,17 @@ def run_ltk_with_input(*inputs)
   shell_output
 end
 
+RSpec.configure do |config|
+  config.after(:each) do
+    Environment.database_connection.execute("DELETE FROM injuries;")
+  end
+end
+
 RSpec::Matchers.define :include_in_order do |*expected|
   match do |actual|
-    regexp_string = expected.join(".*").gsub("?","\\?")
     input = actual.delete("\n")
-    /#{regexp_string}/.match(input).should_not be_nil
+    regexp_string = expected.join(".*").gsub("?","\\?").gsub("\n",".*")
+    result = /#{regexp_string}/.match(input)
+    result.should be
   end
 end

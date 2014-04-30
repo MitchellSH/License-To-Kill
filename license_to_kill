@@ -1,5 +1,14 @@
 #!/usr/bin/env ruby
 
+$LOAD_PATH << "lib"
+$LOAD_PATH << "models"
+
+require 'environment'
+Environment.environment = "test"
+$stderr = $stdout
+
+require 'injury'
+
 def menu
 <<EOS
 What do you want to do?
@@ -7,6 +16,18 @@ What do you want to do?
 2. Add Injury
 3. Evaluate Injured Person
 EOS
+end
+
+def add_injury
+  puts "What is the injury you want to add?"
+  injury_name = gets.chomp
+  injury = Injury.new(injury_name)
+  if injury.save
+    puts "#{injury_name} has been added."
+  else
+    puts injury.errors
+    add_injury
+  end
 end
 
 def get_menu_selection
@@ -17,7 +38,7 @@ def get_menu_selection
   if input == "1"
     puts "Who do you want to add?"
   elsif input == "2"
-    puts "What is the injury you want to add?"
+    add_injury
   elsif input == "3"
     puts "Who is injured?"
   else
